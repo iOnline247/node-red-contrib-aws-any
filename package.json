@@ -1,0 +1,45 @@
+{
+  "name": "node-red-contrib-aws-sdk-anything",
+  "version": "0.3.0",
+  "description": "node-red aws sdk anything",
+  "license": "Apache-2.0",
+  "files": [
+    "/dist"
+  ],
+  "main": "./dist/aws-sdk-anything.js",
+  "node-red": {
+    "nodes": {
+      "aws sdk anything": "./dist/aws-sdk-anything.js",
+      "aws sdk anything config": "./dist/aws-sdk-anything-config.js"
+    }
+  },
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "node ./bin/runner.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "runner": "./bin/runner.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/high-u/node-red-contrib-aws-sdk-anything.git"
+  },
+  "keywords": [
+    "node-red",
+    "aws-sdk"
+  ],
+  "author": "high-u",
+  "bugs": {
+    "url": "https://github.com/high-u/node-red-contrib-aws-sdk-anything/issues"
+  },
+  "homepage": "https://github.com/high-u/node-red-contrib-aws-sdk-anything#readme",
+  "dependencies": {
+    "aws-sdk": "^2.597.0"
+  },
+  "devDependencies": {
+    "esm": "^3.2.25",
+    "fs-extra": "^8.1.0",
+    "replace-in-file": "^5.0.2"
+  }
+}
