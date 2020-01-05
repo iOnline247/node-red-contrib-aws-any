@@ -71,13 +71,23 @@ function generateServiceDefinitions() {
     });
 
     output[service.name] = {
+      name: service.name,
       methods
     };
 
     return output;
   }, {});
 
-  // console.log(definitions);
+  // TODO:
+  // Overwrite the ServiceNames in aws-sdk-any/template.html
+  // https://stackoverflow.com/questions/5467129/sort-javascript-object-by-key
+  // const dataList = Object.keys(definitions).sort().map(def => {
+  //   return `<option>${definitions[def].name}</option>`
+  // }).join("")
+  // console.log(dataList);
+
+  // TODO:
+  // Write the service definitions to JSON in the aws-sdk-any/template.html
 
   return definitions;
 }
