@@ -143,8 +143,8 @@ function writeSource(nodeDefinitions) {
       files: path.join(__dirname, `../dist/${name}.html`),
       from: [
         /(<script type="text\/javascript">)(.|\n)*?(<\/script>)/gim,
-        /(<script type="text\/x-red" data-template-name="uibuilder">)(.|\n)*?(<\/script>)/gim,
-        /(<script type="text\/x-red" data-help-name="uibuilder">)(.|\n)*?(<\/script>)/gim,
+        /(<script type="text\/x-red" data-template-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
+        /(<script type="text\/x-red" data-help-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
         /\{\{name\}\}/gi
       ],
       to: [
