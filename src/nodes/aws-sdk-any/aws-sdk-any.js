@@ -1,9 +1,9 @@
+var AWS = require("aws-sdk");
+
 module.exports = function(RED) {
   "use strict";
 
   function AWSSDKInit(n) {
-    var AWS = require("aws-sdk");
-
     RED.nodes.createNode(this, n);
 
     this.awsConfig = RED.nodes.getNode(n.aws);
@@ -23,9 +23,8 @@ module.exports = function(RED) {
       region: this.region
     });
 
-    var targetService = new AWS[node.service]();
-
     node.on("input", function(msg) {
+      var targetService = new AWS[node.service]();
       var callback = function(err, data) {
         if (err) {
           node.status({ fill: "red", shape: "dot", text: "error" });
