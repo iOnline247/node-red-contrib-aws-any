@@ -1,4 +1,4 @@
-RED.nodes.registerType("aws-sdk-anything-config", {
+RED.nodes.registerType("aws-sdk-any-config", {
   category: "config",
   defaults: {
     name: { value: "AWS" },

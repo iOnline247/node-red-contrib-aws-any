@@ -1,7 +1,7 @@
 module.exports = function(RED) {
   "use strict";
 
-  function AWSSDKAnything(n) {
+  function AWSSDKInit(n) {
     var AWS = require("aws-sdk");
 
     RED.nodes.createNode(this, n);
@@ -67,5 +67,5 @@ module.exports = function(RED) {
       // }
     });
   }
-  RED.nodes.registerType("aws-sdk-anything", AWSSDKAnything);
+  RED.nodes.registerType("aws-sdk-any", AWSSDKInit);
 };

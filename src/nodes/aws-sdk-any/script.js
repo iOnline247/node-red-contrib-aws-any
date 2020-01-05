@@ -1,8 +1,8 @@
-RED.nodes.registerType("aws-sdk-anything", {
+RED.nodes.registerType("aws-sdk-any", {
   category: "AWS",
   color: "#FF9A00",
   defaults: {
-    aws: { type: "aws-sdk-anything-config", required: true },
+    aws: { type: "aws-sdk-any-config", required: true },
     region: { value: "" },
     servicename: { value: "" },
     methodname: { value: "" },

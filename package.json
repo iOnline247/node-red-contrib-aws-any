@@ -1,16 +1,15 @@
 {
-  "name": "node-red-contrib-aws-sdk-anything",
+  "name": "node-red-contrib-aws-sdk-any",
   "version": "0.3.0",
-  "description": "node-red aws sdk anything",
+  "description": "A Node-RED plugin for the AWS SDK.",
   "license": "Apache-2.0",
   "files": [
     "/dist"
   ],
-  "main": "./dist/aws-sdk-anything.js",
   "node-red": {
     "nodes": {
-      "aws sdk anything": "./dist/aws-sdk-anything.js",
-      "aws sdk anything config": "./dist/aws-sdk-anything-config.js"
+      "aws sdk any": "./dist/aws-sdk-any.js",
+      "aws sdk any config": "./dist/aws-sdk-any-config.js"
     }
   },
   "scripts": {
@@ -23,17 +22,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/high-u/node-red-contrib-aws-sdk-anything.git"
+    "url": "git+https://github.com:iOnline247/node-red-contrib-aws-any.git"
   },
   "keywords": [
     "node-red",
     "aws-sdk"
   ],
-  "author": "high-u",
+  "author": "Matthew Bramer",
   "bugs": {
-    "url": "https://github.com/high-u/node-red-contrib-aws-sdk-anything/issues"
+    "url": "https://github.com/iOnline247/node-red-contrib-aws-any/issues"
   },
-  "homepage": "https://github.com/high-u/node-red-contrib-aws-sdk-anything#readme",
+  "homepage": "https://github.com/iOnline247/node-red-contrib-aws-any#readme",
   "dependencies": {
     "aws-sdk": "^2.597.0"
   },

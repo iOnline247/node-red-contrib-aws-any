@@ -77,7 +77,7 @@ function generateServiceDefinitions() {
     return output;
   }, {});
 
-  console.log(definitions);
+  // console.log(definitions);
 
   return definitions;
 }
@@ -97,12 +97,9 @@ function getEachNodesSource() {
     definition.templateSource = fs
       .readFileSync(path.join(definition.path, "template.html"))
       .toString();
-
-    try {
-      definition.helpSource = fs
-        .readFileSync(path.join(definition.path, "help.html"))
-        .toString();
-    } catch {}
+    definition.helpSource = fs
+      .readFileSync(path.join(definition.path, "help.html"))
+      .toString();
 
     return definition;
   });
@@ -141,18 +138,20 @@ function copyTemplateForEachNode(nodeDefinitions) {
 
 function writeSource(nodeDefinitions) {
   nodeDefinitions.forEach(nodeDef => {
-    const { scriptSource, templateSource, helpSource } = nodeDef;
+    const { helpSource, name, scriptSource, templateSource } = nodeDef;
     const options = {
-      files: path.join(__dirname, `../dist/${nodeDef.name}.html`),
+      files: path.join(__dirname, `../dist/${name}.html`),
       from: [
         /(<script type="text\/javascript">)(.|\n)*?(<\/script>)/gim,
         /(<script type="text\/x-red" data-template-name="uibuilder">)(.|\n)*?(<\/script>)/gim,
-        /(<script type="text\/x-red" data-help-name="uibuilder">)(.|\n)*?(<\/script>)/gim
+        /(<script type="text\/x-red" data-help-name="uibuilder">)(.|\n)*?(<\/script>)/gim,
+        /\{\{name\}\}/gi
       ],
       to: [
         `$1\n${scriptSource}\n$3`,
         `$1\n${templateSource}\n$3`,
-        `$1\n${helpSource}\n$3`
+        `$1\n${helpSource}\n$3`,
+        name
       ]
     };
 
