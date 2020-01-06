@@ -4,67 +4,87 @@ module.exports = function(RED) {
   "use strict";
 
   function AWSSDKInit(n) {
-    RED.nodes.createNode(this, n);
-
-    this.awsConfig = RED.nodes.getNode(n.aws);
-    this.region = this.awsConfig.region;
-    this.accessKey = this.awsConfig.accessKey;
-    this.secretKey = this.awsConfig.secretKey;
-    this.service = n.servicename;
-    this.method = n.methodname;
-    this.operation = n.operation;
-    // this.async = n.async;
-
     var node = this;
 
+    RED.nodes.createNode(node, n);
+
+    node.awsConfig = RED.nodes.getNode(n.aws);
+    node.region = node.awsConfig.region;
+    node.accessKey = node.awsConfig.accessKey;
+    node.secretKey = node.awsConfig.secretKey;
+    node.service = n.servicename;
+    node.method = n.methodname;
+    node.operation = n.operation;
+
     AWS.config.update({
-      accessKeyId: this.accessKey,
-      secretAccessKey: this.secretKey,
-      region: this.region
+      accessKeyId: node.accessKey,
+      secretAccessKey: node.secretKey,
+      region: node.region
     });
 
-    node.on("input", function(msg) {
+    node.on("input", async function(msg, send, done) {
       var targetService = new AWS[node.service]();
-      var callback = function(err, data) {
-        if (err) {
-          node.status({ fill: "red", shape: "dot", text: "error" });
-          node.error("failed: " + err.toString(), msg);
-          msg.err = err;
-          msg.params = msg.payload;
-          msg.payload = {};
-          node.send(msg);
-        } else {
-          node.status({});
-          msg.err = {};
-          msg.params = msg.payload;
-          msg.payload = data;
-          node.send(msg);
-        }
-      };
+
+      send =
+        send ||
+        function() {
+          node.send.apply(node, arguments);
+        };
 
       node.status({ fill: "blue", shape: "dot", text: "Processing..." });
-      if (this.operation) {
-        targetService[node.method](this.operation, msg.payload, callback);
-      } else {
-        targetService[node.method](msg.payload, callback);
-      }
 
-      // if (this.async) {
-      //     if (this.operation) {
-      //         targetService[node.method](this.operation, msg.payload);
-      //     } else {
-      //         targetService[node.method](msg.payload);
-      //     }
-      //     node.send(msg);
-      // } else {
-      //     node.status({ fill: "blue", shape: "dot", text: "Processing..." });
-      //     if (this.operation) {
-      //         targetService[node.method](this.operation, msg.payload, callback);
-      //     } else {
-      //         targetService[node.method](msg.payload, callback);
-      //     }
-      // }
+      if (node.operation) {
+        // TODO:
+        // Test this.
+        // TODO:
+        // Promisify this.
+        targetService[node.method](node.operation, msg.payload, function(
+          err,
+          data
+        ) {
+          if (err) {
+            const errorMessage = `${err.name}: ${err.message}`;
+
+            node.status({ fill: "red", shape: "dot", text: "error" });
+
+            if (done) {
+              done(errorMessage);
+            } else {
+              node.error(errorMessage);
+            }
+          } else {
+            node.status({});
+            msg.err = {};
+            msg.params = msg.payload;
+            msg.payload = data;
+
+            send(msg);
+          }
+        });
+      } else {
+        try {
+          const results = await targetService[node.method](
+            msg.payload
+          ).promise();
+
+          msg.payload = results;
+
+          node.status({});
+          send(msg);
+        } catch (err) {
+          const errorMessage = `${err.name}: ${err.message}`;
+
+          node.status({ fill: "red", shape: "dot", text: "error" });
+
+          if (done) {
+            done(errorMessage);
+          } else {
+            node.error(errorMessage);
+          }
+        }
+      }
     });
   }
+
   RED.nodes.registerType("aws-sdk-any", AWSSDKInit);
 };

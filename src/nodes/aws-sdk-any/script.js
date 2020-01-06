@@ -7999,8 +7999,6 @@
       return this.name || "aws " + this.servicename + " " + this.methodname;
     },
     oneditprepare: function() {
-      debugger;
-
       $(function() {
         const $serviceName = $("#node-input-servicename");
         const $methodName = $("#node-input-methodname");
@@ -8025,6 +8023,8 @@
           } catch {}
         });
         $methodName.on("input paste", event => {
+          // TODO:
+          // Test this after operations are added in runner.
           const serviceName = $serviceName.val();
           const { operations } = serviceDefinitions[serviceName];
           const methodName = event.currentTarget.value;
