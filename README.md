@@ -1,5 +1,6 @@
 # node-red-contrib-aws-any
 
+Use this plugin to make AWS API calls within Node-RED. Refer to the AWS-SDK-JS docs for more information: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/top-level-namespace.html
 This plugin installs 2 nodes: `aws-sdk-any-config` and `aws-sdk-any`. The `aws-sdk-any` node has all of the service definitions baked into it. This provides a nice experience within the UI and should keep users from needing to refer to the SDK.
 
 ## Install Plugin
@@ -14,5 +15,6 @@ Since this module is currently not in the NPM registry, you'll need to install f
 
 # TODOs
 
+- Create examples of usages.
 - Add to npm registry
 - Write up on the `./bin/runner.js` logic
