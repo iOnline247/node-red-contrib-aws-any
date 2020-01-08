@@ -49,6 +49,21 @@ function generateServiceDefinitions() {
   }, []);
 
   const definitions = services.reduce((output, service) => {
+    // TODO:
+    // Don't parse the json files, just loop `AWS.apiLoader.services`
+
+    // TODO:
+    // Test objects for one off methods. e.g. `waitFor`
+    // Should do this instead of dealing with .json files:
+    // `AWS.TESTAPI = AWS.Service.defineService('s3', ['2006-03-01']);`
+    // ```
+    //  const latestMethodDate = Object.keys(AWS.TESTAPI).find(
+    //    dateStr => !dateStr.endsWith("*")
+    //  );
+    // `
+    // `var test = new AWS.TESTAPI({region: "us-east-1"})`
+    // Then loop through properties and getting the service definition.
+
     const sdk = AWS[service.name];
     const latestMethodDate = Object.keys(sdk.services).find(
       dateStr => !dateStr.endsWith("*")
