@@ -63,6 +63,8 @@ function generateServiceDefinitions() {
     // `
     // `var test = new AWS.TESTAPI({region: "us-east-1"})`
     // Then loop through properties and getting the service definition.
+    // Test for the `waitFor` method: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#bucketExists-waiter
+    // Try and find any of the other methods that are missed.
 
     const sdk = AWS[service.name];
     const latestMethodDate = Object.keys(sdk.services).find(
