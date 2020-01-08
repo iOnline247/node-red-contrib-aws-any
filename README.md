@@ -1,13 +1,18 @@
 # node-red-contrib-aws-any
 
-## Build plugin
-From a command prompt, run:
+This plugin installs 2 nodes: `aws-sdk-any-config` and `aws-sdk-any`. The `aws-sdk-any` node has all of the service definitions baked into it. This provides a nice experience within the UI and should keep users from needing to refer to the SDK.
 
-```
-npm run build
-```
+## Install Plugin
 
-This will create a `dist` folder and add the necessary assets for the `node-red-contrib-aws-config` and the `node-red-contrib-aws-any` plugins.
+Since this module is currently not in the NPM registry, you'll need to install from a local version. To do this, follow these steps from a shell/command prompt:
+
+- `git clone git@github.com:iOnline247/node-red-contrib-aws-any.git`
+
+- Change the shell to the directory where the module is cloned and run `npm run build`. This will create the `dist` folder by executing the `./bin/runner.js`
+
+- Install the plugin into Node-RED by following [these instructions](https://nodered.org/docs/creating-nodes/first-node#testing-your-node-in-node-red).
 
 # TODOs
-  - Add to npm registry
+
+- Add to npm registry
+- Write up on the `./bin/runner.js` logic
