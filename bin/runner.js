@@ -4,14 +4,11 @@ const AWS = require("aws-sdk");
 const replaceInFile = require("replace-in-file");
 // const awsRegions = require("../src/data/regions");
 
-const awsSdkLocation = "./node_modules/aws-sdk/apis";
-const apiFileNames = fs.readdirSync(awsSdkLocation);
-const metadata = require(`.${awsSdkLocation}/metadata`);
-
 // #region Utils
 function createDistDirectory() {
   return new Promise((resolve, reject) => {
     const distDirectoryPath = path.join(__dirname, "../dist");
+
     try {
       fs.removeSync(distDirectoryPath);
     } catch (err) {
@@ -30,81 +27,63 @@ function createDistDirectory() {
   });
 }
 
-function getApiFilePrefix(serviceName) {
-  const serviceId = serviceName.toLowerCase();
-  return serviceId;
+function getLatestApiVersion(service) {
+  const ordered = {};
+
+  Object.keys(service)
+    .sort()
+    .forEach(function(key) {
+      ordered[key] = service[key];
+    });
+
+  const serviceNames = Object.keys(ordered);
+  const latestApiRev = serviceNames[serviceNames.length - 1];
+
+  return service[latestApiRev];
 }
 
 // #endregion
 
 function generateServiceDefinitions() {
-  const services = Object.keys(metadata).reduce((output, service) => {
-    const value = metadata[service];
-    output.push({
-      name: value.name,
-      value
-    });
-
-    return output;
-  }, []);
-
-  const definitions = services.reduce((output, service) => {
-    // TODO:
-    // Don't parse the json files, just loop `AWS.apiLoader.services`
-
-    // TODO:
-    // Test objects for one off methods. e.g. `waitFor`
-    // Should do this instead of dealing with .json files:
-    // `objTest = AWS.Service.defineService('s3', ['2006-03-01']);`
-    // ```
-    //  const latestMethodDate = Object.keys(objTest.services).find(
-    //    dateStr => !dateStr.endsWith("*")
-    //  );
-    // `
-    // `var test = new AWS.TESTAPI({region: "us-east-1"})`
-    // Then loop through properties and getting the service definition.
-    // Test for the `waitFor` method: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#bucketExists-waiter
-    // Try and find any of the other methods that are missed.
-
-    const sdk = AWS[service.name];
-    const latestMethodDate = Object.keys(sdk.services).find(
-      dateStr => !dateStr.endsWith("*")
+  const metadata = require("../node_modules/aws-sdk/apis/metadata");
+  const services = Object.keys(metadata)
+    .map(service => metadata[service].name)
+    .sort();
+  const definitions = services.reduce((output, serviceName) => {
+    const serviceDefinition = getLatestApiVersion(
+      AWS.apiLoader.services[serviceName.toLowerCase()]
     );
-
-    let filePrefix = getApiFilePrefix(service.name);
-    let serviceDefinition;
-
-    try {
-      serviceDefinition = require(`.${awsSdkLocation}/${filePrefix}-${latestMethodDate}.min.json`);
-    } catch {
-      filePrefix = getApiFilePrefix(service.value.prefix);
-      serviceDefinition = require(`.${awsSdkLocation}/${filePrefix}-${latestMethodDate}.min.json`);
-    }
-
     const methods = Object.keys(serviceDefinition.operations).map(method => {
       const methodName = method.charAt(0).toLowerCase() + method.slice(1);
 
       return methodName;
     });
 
-    output[service.name] = {
-      name: service.name,
-      methods
+    const waiters = serviceDefinition.waiters || {};
+    const hasWaiters = Object.keys(waiters).length > 0;
+    const waiterOps = Object.keys(waiters)
+      .map(waiter => {
+        const waiterName = waiter.charAt(0).toLowerCase() + waiter.slice(1);
+
+        return waiterName;
+      })
+      .sort();
+
+    if (hasWaiters) {
+      methods.push("waitFor");
+    }
+
+    // TODO:
+    // Add operations. e.g. S3
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+    output[serviceName] = {
+      name: serviceName,
+      methods,
+      waiterOps
     };
 
     return output;
   }, {});
-
-  // TODO:
-  // Overwrite the ServiceNames in aws-sdk-any/template.html
-  // https://stackoverflow.com/questions/5467129/sort-javascript-object-by-key
-  // const dataList = Object.keys(definitions).sort().map(def => {
-  //   return `<option>${definitions[def].name}</option>`
-  // }).join("")
-  // console.log(dataList);
-
-  // TODO:
-  // Write the service definitions to JSON in the aws-sdk-any/template.html
 
   return definitions;
 }
@@ -134,18 +113,6 @@ function getEachNodesSource() {
   return nodeDefinitions;
 }
 
-function generateHtml(serviceDefs) {
-  const serviceNames = Object.keys(serviceDefs);
-
-  serviceNames.forEach(serviceName => {
-    const service = serviceDefs[serviceName];
-
-    service.methodHtml = service.methods.reduce((output, method) => {}, "");
-  });
-
-  return serviceDefs;
-}
-
 function copyTemplateForEachNode(nodeDefinitions) {
   const nodeTemplate = path.join(__dirname, "../src/nodeTemplate.html");
 
@@ -163,20 +130,27 @@ function copyTemplateForEachNode(nodeDefinitions) {
   });
 }
 
-function writeSource(nodeDefinitions) {
+function writeSource(nodeDefinitions, serviceDefinitions) {
   nodeDefinitions.forEach(nodeDef => {
     const { helpSource, name, scriptSource, templateSource } = nodeDef;
+    const serviceNamesHtml = Object.keys(serviceDefinitions)
+      .map(serviceName => `<option>${serviceName}</option>`)
+      .join("");
     const options = {
       files: path.join(__dirname, `../dist/${name}.html`),
       from: [
         /(<script type="text\/javascript">)(.|\n)*?(<\/script>)/gim,
+        /"{{{serviceDefinitions}}}"/,
         /(<script type="text\/x-red" data-template-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
+        /{{{serviceNamesHtml}}}/,
         /(<script type="text\/x-red" data-help-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
         /\{\{name\}\}/gi
       ],
       to: [
         `$1\n${scriptSource}\n$3`,
+        JSON.stringify(serviceDefinitions),
         `$1\n${templateSource}\n$3`,
+        serviceNamesHtml,
         `$1\n${helpSource}\n$3`,
         name
       ]
@@ -189,11 +163,10 @@ function writeSource(nodeDefinitions) {
 async function main() {
   await createDistDirectory();
   const serviceDefs = generateServiceDefinitions();
-  const { methodHtml, serviceHtml, operationsHtml } = generateHtml(serviceDefs);
   const nodeDefinitions = getEachNodesSource();
 
   copyTemplateForEachNode(nodeDefinitions);
-  writeSource(nodeDefinitions);
+  writeSource(nodeDefinitions, serviceDefs);
 }
 
 main();
