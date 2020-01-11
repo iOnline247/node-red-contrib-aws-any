@@ -4,14 +4,11 @@ const AWS = require("aws-sdk");
 const replaceInFile = require("replace-in-file");
 // const awsRegions = require("../src/data/regions");
 
-const awsSdkLocation = "./node_modules/aws-sdk/apis";
-const apiFileNames = fs.readdirSync(awsSdkLocation);
-const metadata = require(`.${awsSdkLocation}/metadata`);
-
 // #region Utils
 function createDistDirectory() {
   return new Promise((resolve, reject) => {
     const distDirectoryPath = path.join(__dirname, "../dist");
+
     try {
       fs.removeSync(distDirectoryPath);
     } catch (err) {
@@ -30,10 +27,6 @@ function createDistDirectory() {
   });
 }
 
-function getApiFilePrefix(serviceName) {
-  return serviceName.toLowerCase();
-}
-
 function getLatestApiVersion(service) {
   const ordered = {};
 
@@ -45,70 +38,52 @@ function getLatestApiVersion(service) {
 
   const serviceNames = Object.keys(ordered);
   const latestApiRev = serviceNames[serviceNames.length - 1];
-  
-  return service[latestApiRev]
+
+  return service[latestApiRev];
 }
 
 // #endregion
 
 function generateServiceDefinitions() {
-  const services = Object.keys(metadata).reduce((output, service) => {
-    const value = metadata[service];
-    output.push({
-      name: value.name,
-      value
-    });
-
-    return output;
-  }, []);
-
-  const definitions = services.reduce((output, definition) => {
-    // TODO:
-    // Don't parse the json files, just loop `AWS.apiLoader.services`
-    // Test objects for one off methods. e.g. `waitFor`
-    // Should do this instead of dealing with .json files:
-    // `var test = new AWS.TESTAPI({region: "us-east-1"})`
-    // Then loop through properties and getting the service definition.
-    // Test for the `waitFor` method: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#bucketExists-waiter
-    // Try and find any of the other methods that are missed.
-    const serviceName = definition.name;
-    const awsVersions = AWS[serviceName];
-    const sdk = new AWS[serviceName]({ endpoint: "my.host.tld" });
-    
-    const filePrefix = getApiFilePrefix(serviceName);
-    const serviceDefinition = getLatestApiVersion(AWS.apiLoader.services[filePrefix]);
-
-    // try {
-    //   serviceDefinition = require(`.${awsSdkLocation}/${filePrefix}-${latestMethodDate}.min.json`);
-    // } catch {
-    //   filePrefix = getApiFilePrefix(service.value.prefix);
-    //   serviceDefinition = require(`.${awsSdkLocation}/${filePrefix}-${latestMethodDate}.min.json`);
-    // }
-
+  const metadata = require("../node_modules/aws-sdk/apis/metadata");
+  const services = Object.keys(metadata)
+    .map(service => metadata[service].name)
+    .sort();
+  const definitions = services.reduce((output, serviceName) => {
+    const serviceDefinition = getLatestApiVersion(
+      AWS.apiLoader.services[serviceName.toLowerCase()]
+    );
     const methods = Object.keys(serviceDefinition.operations).map(method => {
       const methodName = method.charAt(0).toLowerCase() + method.slice(1);
 
       return methodName;
     });
 
+    const waiters = serviceDefinition.waiters || {};
+    const hasWaiters = Object.keys(waiters).length > 0;
+    const waiterOps = Object.keys(waiters)
+      .map(waiter => {
+        const waiterName = waiter.charAt(0).toLowerCase() + waiter.slice(1);
+
+        return waiterName;
+      })
+      .sort();
+
+    if (hasWaiters) {
+      methods.push("waitFor");
+    }
+
+    // TODO:
+    // Add operations. e.g. S3
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
     output[serviceName] = {
       name: serviceName,
-      methods
+      methods,
+      waiterOps
     };
 
     return output;
   }, {});
-
-  // TODO:
-  // Overwrite the ServiceNames in aws-sdk-any/template.html
-  // https://stackoverflow.com/questions/5467129/sort-javascript-object-by-key
-  // const dataList = Object.keys(definitions).sort().map(def => {
-  //   return `<option>${definitions[def].name}</option>`
-  // }).join("")
-  // console.log(dataList);
-
-  // TODO:
-  // Write the service definitions to JSON in the aws-sdk-any/template.html
 
   return definitions;
 }
@@ -158,12 +133,16 @@ function copyTemplateForEachNode(nodeDefinitions) {
 function writeSource(nodeDefinitions, serviceDefinitions) {
   nodeDefinitions.forEach(nodeDef => {
     const { helpSource, name, scriptSource, templateSource } = nodeDef;
+    const serviceNamesHtml = Object.keys(serviceDefinitions)
+      .map(serviceName => `<option>${serviceName}</option>`)
+      .join("");
     const options = {
       files: path.join(__dirname, `../dist/${name}.html`),
       from: [
         /(<script type="text\/javascript">)(.|\n)*?(<\/script>)/gim,
         /"{{{serviceDefinitions}}}"/,
         /(<script type="text\/x-red" data-template-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
+        /{{{serviceNamesHtml}}}/,
         /(<script type="text\/x-red" data-help-name="{{name}}">)(.|\n)*?(<\/script>)/gim,
         /\{\{name\}\}/gi
       ],
@@ -171,6 +150,7 @@ function writeSource(nodeDefinitions, serviceDefinitions) {
         `$1\n${scriptSource}\n$3`,
         JSON.stringify(serviceDefinitions),
         `$1\n${templateSource}\n$3`,
+        serviceNamesHtml,
         `$1\n${helpSource}\n$3`,
         name
       ]
@@ -182,9 +162,6 @@ function writeSource(nodeDefinitions, serviceDefinitions) {
 
 async function main() {
   await createDistDirectory();
-
-  AWS.config.update({ region: "us-east-1" });
-
   const serviceDefs = generateServiceDefinitions();
   const nodeDefinitions = getEachNodesSource();
 
