@@ -55,9 +55,9 @@ function generateServiceDefinitions() {
     // TODO:
     // Test objects for one off methods. e.g. `waitFor`
     // Should do this instead of dealing with .json files:
-    // `AWS.TESTAPI = AWS.Service.defineService('s3', ['2006-03-01']);`
+    // `objTest = AWS.Service.defineService('s3', ['2006-03-01']);`
     // ```
-    //  const latestMethodDate = Object.keys(AWS.TESTAPI).find(
+    //  const latestMethodDate = Object.keys(objTest.services).find(
     //    dateStr => !dateStr.endsWith("*")
     //  );
     // `
