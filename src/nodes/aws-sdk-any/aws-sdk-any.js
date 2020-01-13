@@ -22,8 +22,23 @@ module.exports = function(RED) {
       region: node.region
     });
 
+    function invokeCallbackApi(targetService, node, msg) {
+      return new Promise((resolve, reject) => {
+        targetService[node.method](node.operation, msg.payload, function(
+          err,
+          data
+        ) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
+    }
+
     node.on("input", async function(msg, send, done) {
-      var targetService = new AWS[node.service]();
+      const targetService = new AWS[node.service]();
 
       send =
         send ||
@@ -33,54 +48,28 @@ module.exports = function(RED) {
 
       node.status({ fill: "blue", shape: "dot", text: "Processing..." });
 
-      if (node.operation) {
-        // TODO:
-        // Test this.
-        // TODO:
-        // Promisify this.
-        targetService[node.method](node.operation, msg.payload, function(
-          err,
-          data
-        ) {
-          if (err) {
-            const errorMessage = `${err.name}: ${err.message}`;
+      try {
+        let response;
 
-            node.status({ fill: "red", shape: "dot", text: "error" });
+        if (node.operation) {
+          response = await invokeCallbackApi(targetService, node, msg);
+        } else {
+          response = await targetService[node.method](msg.payload).promise();
+        }
 
-            if (done) {
-              done(errorMessage);
-            } else {
-              node.error(errorMessage);
-            }
-          } else {
-            node.status({});
-            msg.err = {};
-            msg.params = msg.payload;
-            msg.payload = data;
+        msg.payload = response;
 
-            send(msg);
-          }
-        });
-      } else {
-        try {
-          const results = await targetService[node.method](
-            msg.payload
-          ).promise();
+        node.status({});
+        send(msg);
+      } catch (err) {
+        const errorMessage = `${err.name}: ${err.message}`;
 
-          msg.payload = results;
+        node.status({ fill: "red", shape: "dot", text: "error" });
 
-          node.status({});
-          send(msg);
-        } catch (err) {
-          const errorMessage = `${err.name}: ${err.message}`;
-
-          node.status({ fill: "red", shape: "dot", text: "error" });
-
-          if (done) {
-            done(errorMessage);
-          } else {
-            node.error(errorMessage);
-          }
+        if (done) {
+          done(errorMessage);
+        } else {
+          node.error(errorMessage);
         }
       }
     });
