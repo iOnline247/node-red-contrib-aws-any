@@ -51,7 +51,7 @@ module.exports = function(RED) {
       try {
         let response;
 
-        if (node.operation) {
+        if (node.operation != null) {
           response = await invokeCallbackApi(targetService, node, msg);
         } else {
           response = await targetService[node.method](msg.payload).promise();
