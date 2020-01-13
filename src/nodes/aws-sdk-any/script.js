@@ -56,6 +56,10 @@
               .join("");
           }
         });
+
+        // Set the datalists for each
+        $serviceName.trigger("input");
+        $methodName.trigger("input");
       });
     }
   });
