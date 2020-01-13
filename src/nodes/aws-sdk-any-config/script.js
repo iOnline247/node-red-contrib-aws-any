@@ -10,5 +10,6 @@ RED.nodes.registerType("aws-sdk-any-config", {
   },
   label: function() {
     return this.name;
-  }
+  },
+  oneditprepare: function() {debugger;}
 });
