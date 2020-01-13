@@ -1,10 +1,10 @@
 {
   "name": "node-red-contrib-aws-sdk-any",
-  "version": "0.3.0",
+  "version": "0.8.0",
   "description": "A Node-RED plugin for the AWS SDK.",
   "license": "Apache-2.0",
   "files": [
-    "/dist"
+    "dist/"
   ],
   "node-red": {
     "nodes": {
