@@ -6,7 +6,7 @@ const {
 } = process.env;
 
 module.exports = function(RED) {
-  function RemoteServerNode(config) {
+  function AWSConfigNode(config) {
     const node = this;
 
     RED.nodes.createNode(node, config);
@@ -17,7 +17,7 @@ module.exports = function(RED) {
     node.name = config.name;
   }
 
-  RED.nodes.registerType("aws-sdk-any-config", RemoteServerNode, {
+  RED.nodes.registerType("aws-sdk-any-config", AWSConfigNode, {
     credentials: {
       accessKey: { type: "text" },
       secretKey: { type: "password" }
