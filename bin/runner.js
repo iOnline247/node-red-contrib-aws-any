@@ -61,25 +61,32 @@ function generateServiceDefinitions() {
 
     const waiters = serviceDefinition.waiters || {};
     const hasWaiters = Object.keys(waiters).length > 0;
-    const waiterOps = Object.keys(waiters)
-      .map(waiter => {
-        const waiterName = waiter.charAt(0).toLowerCase() + waiter.slice(1);
+    const waiterOps = Object.keys(waiters).map(waiter => {
+      const waiterName = waiter.charAt(0).toLowerCase() + waiter.slice(1);
 
-        return waiterName;
-      })
-      .sort();
+      return waiterName;
+    });
 
     if (hasWaiters) {
       methods.push("waitFor");
     }
 
-    // TODO:
-    // Add operations. e.g. S3
-    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getSignedUrl-property
+    let operations = {};
+
+    // 1 off service with weird signature.
+    if (serviceName === "S3") {
+      methods.push("getSignedUrl", "getSignedUrlPromise");
+      operations = {
+        getSignedUrl: ["getObject", "putObject"],
+        getSignedUrlPromise: ["getObject", "putObject"]
+      };
+    }
+
     output[serviceName] = {
       name: serviceName,
-      methods,
-      waiterOps
+      methods: methods.sort(),
+      waiterOps: waiterOps.sort(),
+      operations
     };
 
     return output;

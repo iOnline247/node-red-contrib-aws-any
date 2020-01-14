@@ -1,3 +1,9 @@
+<style>
+.node-red-contrib-aws-sdk-any-hide {
+    display: none;
+}
+</style>
+
 <div class="form-row">
     <label for="node-input-aws"><i class="fa fa-user"></i>AWS</label>
     <input type="text" id="node-input-aws" />
@@ -18,8 +24,10 @@
 </div>
 <div class="form-row input-bucket-row">
     <label for="node-input-operation"><i class="fa icon-filter"></i>Operation</label>
-    <input type="text" id="node-input-operation">
-    </input>
+    <input type="text" id="node-input-operation" list="node-config-input-operation-list" />
+    <datalist id="node-config-input-operation-list">
+
+    </datalist>
 </div>
 <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i>Name</label>
