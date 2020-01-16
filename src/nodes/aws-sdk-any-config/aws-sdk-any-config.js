@@ -15,9 +15,16 @@ module.exports = function(RED) {
     node.secretKey = node.credentials.secretKey || AWS_SECRET_ACCESS_KEY;
     node.region = config.region || AWS_REGION || AMAZON_REGION;
     node.name = config.name;
+    node.customcreds = config.customcreds;
   }
 
   RED.nodes.registerType("aws-sdk-any-config", AWSConfigNode, {
+    settings: {
+      awsSdkAnyConfig_hasCredentials: {
+        value: !!(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY),
+        exportable: true
+      }
+    },
     credentials: {
       accessKey: { type: "text" },
       secretKey: { type: "password" }

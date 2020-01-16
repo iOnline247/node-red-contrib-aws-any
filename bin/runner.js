@@ -11,9 +11,8 @@ function createDistDirectory() {
 
     try {
       fs.removeSync(distDirectoryPath);
-    } catch (err) {
-      debugger;
-    }
+    } catch (err) {}
+
     try {
       fs.mkdir(distDirectoryPath, err => {
         if (err) {
@@ -23,7 +22,9 @@ function createDistDirectory() {
 
         resolve();
       });
-    } catch {}
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 

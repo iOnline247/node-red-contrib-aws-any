@@ -16,6 +16,10 @@ module.exports = function(RED) {
     node.method = n.methodname;
     node.operation = n.operation;
 
+    // TODO:
+    // Set credentials differently.
+    // Test by using multiple aws-any nodes on a flow and run at the same time
+    // with different credentials.
     AWS.config.update({
       accessKeyId: node.accessKey,
       secretAccessKey: node.secretKey,
@@ -51,7 +55,9 @@ module.exports = function(RED) {
       try {
         let response;
 
-        if (node.operation != null) {
+        const shouldUseCallback = !!node.operation;
+
+        if (shouldUseCallback) {
           response = await invokeCallbackApi(targetService, node, msg);
         } else {
           response = await targetService[node.method](msg.payload).promise();

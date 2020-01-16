@@ -1,50 +1,77 @@
-<div class="form-row">
-  <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
-  <input type="text" id="node-config-input-name" />
-</div>
-<div class="form-row">
-  <label for="node-config-input-region">
-    <i class="fa icon-globe"></i> Region
-  </label>
-  <input
-    type="text"
-    id="node-config-input-region"
-    list="node-config-input-region-list"
-  />
-  <datalist id="node-config-input-region-list">
-    <option>ap-east-1</option>
-    <option>ap-northeast-1</option>
-    <option>ap-northeast-2</option>
-    <option>ap-northeast-3</option>
-    <option>ap-southeast-1</option>
-    <option>ap-southeast-2</option>
-    <option>ap-south-1</option>
-    <option>ca-central-1</option>
-    <option>cn-north-1</option>
-    <option>cn-northwest-1</option>
-    <option>eu-central-1</option>
-    <option>eu-north-1</option>
-    <option>eu-west-1</option>
-    <option>eu-west-2</option>
-    <option>eu-west-3</option>
-    <option>me-south-1</option>
-    <option>sa-east-1</option>
-    <option>us-east-1</option>
-    <option>us-east-2</option>
-    <option>us-gov-east-1</option>
-    <option>us-west-1</option>
-    <option>us-west-2</option>
-  </datalist>
-</div>
-<div class="form-row">
-  <label for="node-config-input-accessKey">
-    <i class="fa icon-check"></i> Access Id
-  </label>
-  <input type="text" id="node-config-input-accessKey" />
-</div>
-<div class="form-row">
-  <label for="node-config-input-secretKey">
-    <i class="fa icon-check"></i> Secret Key
-  </label>
-  <input type="password" id="node-config-input-secretKey" />
-</div>
+<style>
+  .aws-sdk-hide {
+    display: none;
+  }
+  .aws-sdk-center {
+    text-align: center;
+  }
+  .aws-sdk-creds:disabled input {
+    background: #ccc;
+  }
+  #aws-sdk-custom-creds {
+    /* TODO */
+  }
+</style>
+
+<form>
+  <div class="form-row">
+    <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-config-input-name" />
+  </div>
+  <fieldset name="aws-sdk-creds" class="aws-sdk-creds">
+    <label
+      class="aws-sdk-center aws-sdk-lock"
+      for="node-config-input-customcreds"
+    >
+      <input type="checkbox" id="node-config-input-customcreds" />
+      <i class="fa fa-unlock" aria-hidden="true"></i>
+      Use Server Configuration</label
+    >
+    <div class="form-row">
+      <label for="node-config-input-region">
+        <i class="fa icon-globe"></i> Region
+      </label>
+      <input
+        type="text"
+        id="node-config-input-region"
+        list="node-config-input-region-list"
+      />
+      <datalist id="node-config-input-region-list">
+        <option>ap-east-1</option>
+        <option>ap-northeast-1</option>
+        <option>ap-northeast-2</option>
+        <option>ap-northeast-3</option>
+        <option>ap-southeast-1</option>
+        <option>ap-southeast-2</option>
+        <option>ap-south-1</option>
+        <option>ca-central-1</option>
+        <option>cn-north-1</option>
+        <option>cn-northwest-1</option>
+        <option>eu-central-1</option>
+        <option>eu-north-1</option>
+        <option>eu-west-1</option>
+        <option>eu-west-2</option>
+        <option>eu-west-3</option>
+        <option>me-south-1</option>
+        <option>sa-east-1</option>
+        <option>us-east-1</option>
+        <option>us-east-2</option>
+        <option>us-gov-east-1</option>
+        <option>us-west-1</option>
+        <option>us-west-2</option>
+      </datalist>
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-accessKey">
+        <i class="fa icon-check"></i> Access Id
+      </label>
+      <input type="text" id="node-config-input-accessKey" />
+    </div>
+    <div class="form-row">
+      <label for="node-config-input-secretKey">
+        <i class="fa icon-check"></i> Secret Key
+      </label>
+      <input type="password" id="node-config-input-secretKey" />
+    </div>
+  </fieldset>
+</form>
