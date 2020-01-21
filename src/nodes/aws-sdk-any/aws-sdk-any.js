@@ -1,48 +1,40 @@
-var AWS = require("aws-sdk");
+function invokeCallbackApi(targetService, node, msg) {
+  return new Promise((resolve, reject) => {
+    targetService[node.method](node.operation, msg.payload, function(
+      err,
+      data
+    ) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
 
 module.exports = function(RED) {
-  "use strict";
-
   function AWSSDKInit(n) {
-    var node = this;
+    const AWS = require("aws-sdk");
+    const node = this;
 
     RED.nodes.createNode(node, n);
 
     node.awsConfig = RED.nodes.getNode(n.aws);
     node.region = node.awsConfig.region;
-    node.accessKey = node.awsConfig.accessKey;
-    node.secretKey = node.awsConfig.secretKey;
     node.service = n.servicename;
     node.method = n.methodname;
     node.operation = n.operation;
 
-    // TODO:
-    // Set credentials differently.
-    // Test by using multiple aws-any nodes on a flow and run at the same time
-    // with different credentials.
-    AWS.config.update({
-      accessKeyId: node.accessKey,
-      secretAccessKey: node.secretKey,
-      region: node.region
-    });
-
-    function invokeCallbackApi(targetService, node, msg) {
-      return new Promise((resolve, reject) => {
-        targetService[node.method](node.operation, msg.payload, function(
-          err,
-          data
-        ) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data);
-          }
-        });
-      });
-    }
-
     node.on("input", async function(msg, send, done) {
-      const targetService = new AWS[node.service]();
+      // This supports multiple AWS credentials.
+      // AWS.config.update updates creds for all nodes,
+      // which is not ideal.
+      const targetService = new AWS[node.service]({
+        accessKeyId: node.awsConfig.accessKey,
+        secretAccessKey: node.awsConfig.secretKey,
+        region: node.region
+      });
 
       send =
         send ||

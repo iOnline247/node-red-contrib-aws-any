@@ -2,7 +2,7 @@ RED.nodes.registerType("aws-sdk-any-config", {
   category: "config",
   defaults: {
     name: { value: "AWS" },
-    region: { value: "us-east-1", required: true },
+    region: { value: "", required: false },
     customcreds: { value: false, required: false }
   },
   credentials: {
@@ -39,6 +39,10 @@ RED.nodes.registerType("aws-sdk-any-config", {
       $lockIcon
         .toggleClass("fa-lock", !shouldUseServerConfig)
         .toggleClass("fa-unlock", shouldUseServerConfig);
+
+      if ($nodeArgCredentials.prop("checked")) {
+        $credentialFields.find('input[type="text"]').val("");
+      }
     });
   }
 });
