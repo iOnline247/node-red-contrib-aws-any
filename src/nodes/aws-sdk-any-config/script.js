@@ -14,7 +14,6 @@ RED.nodes.registerType("aws-sdk-any-config", {
   },
   oneditprepare: function() {
     const $credentialFields = $(".aws-sdk-creds");
-    const $serverConfig = $(".aws-sdk-lock");
     const $nodeArgCredentials = $("#node-config-input-customcreds");
     const $lockIcon = $nodeArgCredentials.next("i");
     const hasNodeArgConfig = RED.settings.awsSdkAnyConfig_hasCredentials;
@@ -29,18 +28,19 @@ RED.nodes.registerType("aws-sdk-any-config", {
       $serverConfig.addClass("aws-sdk-hide");
     }
 
-    $serverConfig.on("click", event => {
+    $nodeArgCredentials.on("change", function(event) {
       event.preventDefault();
 
-      const shouldUseServerConfig = $nodeArgCredentials.prop("checked");
+      const shouldUseServerConfig = this.checked;
 
-      $nodeArgCredentials.prop("checked", !shouldUseServerConfig);
-      $credentialFields.prop("disabled", !shouldUseServerConfig);
+      $nodeArgCredentials.prop("checked", shouldUseServerConfig);
+      $credentialFields.prop("disabled", shouldUseServerConfig);
       $lockIcon
-        .toggleClass("fa-lock", !shouldUseServerConfig)
-        .toggleClass("fa-unlock", shouldUseServerConfig);
+        .toggleClass("fa-lock", shouldUseServerConfig)
+        .toggleClass("fa-unlock", !shouldUseServerConfig);
 
-      if ($nodeArgCredentials.prop("checked")) {
+      debugger;
+      if (this.checked) {
         $credentialFields.find('input[type="text"]').val("");
       }
     });
